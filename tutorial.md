@@ -431,7 +431,7 @@ gcloud projects delete $GOOGLE_CLOUD_PROJECT
 
 ## What's next
 
-- Find more about GKE cost optimization in [Best practices for running cost-optimized Kubernetes applications on GKE](https://cloud.google.com/solutions/best-practices-for-running-cost-effective-kubernetes-applications-on-gke#fine-tune_gke_autoscaling).
+- Find more about GKE cost optimization in [Best practices for running cost-optimized Kubernetes applications on GKE](https://cloud.google.com/solutions/best-practices-for-running-cost-effective-kubernetes-applications-on-gke).
 - Read [Running web applications on GKE using cost-optimized Preemptible VMs](https://cloud.google.com/solutions/running-web-applications-on-gke-using-cost-optimized-pvms-and-traffic-director).
 - Find more tips and best practices for optimizing costs at [Cost optimization on Google Cloud for developers and operators](https://cloud.google.com/solutions/cost-efficiency-on-google-cloud).
 - Read [Optimizing resource usage in a multi-tenant GKE cluster using node auto-provisioning](https://cloud.google.com/solutions/optimizing-resources-in-multi-tenant-gke-clusters-with-auto-provisioning) for more details on how to lower costs on batch applications.
