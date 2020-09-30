@@ -12,7 +12,7 @@ This tutorial explains how to deploy a scheduled autoscaler on Google Kubernetes
 If you like, you can take the interactive version of this tutorial, which runs
 in the Cloud Console:
 
-[![Open in Cloud Console](https://walkthroughs.googleusercontent.com/tutorial/resources/open-in-console-button.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Ffernandorubbo%2Fhpa-cron.git&cloudshell_working_dir=.&cloudshell_tutorial=tutorial.md)
+[![Open in Cloud Console](https://walkthroughs.googleusercontent.com/tutorial/resources/open-in-console-button.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Ffernandorubbo%2Fscheduled-autoscaler.git&cloudshell_working_dir=.&cloudshell_tutorial=tutorial.md)
 
 </walkthrough-alt>
 
@@ -22,11 +22,7 @@ The majority of systems have its users engaging with the app during the day time
 
 This tutorial focus on scenarios where these traffic patterns are well known and you want to give the autoscaler some hints upfront spikes reache your infrastructure. Although this paper discusses GKE cluster scaling up in the morning and scaling down at night, you can use a similar approach to spin up capacity before known events, such as black friday, syber monday, tv comertials, etc.
 
-<center>
-
-![Scheduled Autoscaler](https://github.com/fernandorubbo/hpa-cron/blob/master/images/scheduled-autoscaler-arquitecture.png?raw=true)
-
-</center>
+![Scheduled Autoscaler](https://github.com/fernandorubbo/scheduled-autoscaler/blob/master/images/scheduled-autoscaler-arquitecture.png?raw=true)
 
 The above picture shows how the scheduled autoscaler works. First a set of [CronJobs](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/) save the known traffic patterns into a [Cloud Monitoring custom metric](https://cloud.google.com/monitoring/custom-metrics). This data is then used by your [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) (HPA) as a on when HPA should preemptively scale your workload. Along with other load metrics, such as target CPU utilization, HPA decides how to update the replicas of a given deployment.
 
@@ -206,11 +202,7 @@ resources you created. For more information, see [Cleaning up](#cleaning-up).
 
 If you want to scale down you cluster at night, you must first understand the basics of [committed-use discount](https://cloud.google.com/docs/cuds) (CUD). If you intend to stay with Google Cloud for a few years, we strongly recommend that you purchase committed-use discounts in return for deeply discounted prices for VM usage (up to 70% discount). If you are unsure about how much resource to commit, look at your minimum computing usage — for example, during night time — and commit the payment for that amount.
 
-<center>
-
-![Committed-use discount](https://github.com/fernandorubbo/hpa-cron/blob/master/images/commit-use.png?raw=true)
-
-</center>
+![Committed-use discount](https://github.com/fernandorubbo/scheduled-autoscaler/blob/master/images/commit-use.png?raw=true)
 
 As you can see in the image above, CUD is flat. Meaning, the resource used during the day doen't compensate the unused resource during the night. Because of this reason, resources used by spikes should not be included in CUD. To optimize your costs, you must use GKE autoscaler options. For example, the scheduled autoscaler discussed in this paper or other managed options discussed in [Best practices for running cost-optimized Kubernetes applications on GKE](https://cloud.google.com/solutions/best-practices-for-running-cost-effective-kubernetes-applications-on-gke#fine-tune_gke_autoscaling). If you are already paying  CUD for a given amount of resources, there is no reason for not using it at night. In this case, try to schedule some jobs to fill the gaps of low computing demand, or keep your cluster warm even without usage.
 
@@ -401,15 +393,15 @@ If you intent is to run such scheduled autoscaler in a production environment yo
 
     - **Scheduled Metric (desired # of Pods)** graph shows a time series of the custom metric you are sending to Cloud Monitoring through your CronJobs configured in [Setting up a scheduled autoscaler](#setting-up-a-scheduled-autoscaler). 
 
-        ![Scheduled Metric (desired # of Pods)](https://github.com/fernandorubbo/hpa-cron/blob/master/images/scheduled-metric.png?raw=true)
+        ![Scheduled Metric (desired # of Pods)](https://github.com/fernandorubbo/scheduled-autoscaler/blob/master/images/scheduled-metric.png?raw=true)
 
     - **CPU Utilization (requested vs used)** graph shows a time series of CPU requested (red) vs the actual CPU usage. Note that when the load is low, HPA honors the scheduled autoscaler decision. However, when the traffic increases, it increases the number of Pods as needed (see data points between 12PM to 6PM).
 
-        ![CPU Utilization (requested vs used)](https://github.com/fernandorubbo/hpa-cron/blob/master/images/cpu-utilization.png?raw=true)
+        ![CPU Utilization (requested vs used)](https://github.com/fernandorubbo/scheduled-autoscaler/blob/master/images/cpu-utilization.png?raw=true)
 
     - **Number of Pods (scheduled vs actual) + Mean CPU Utilization** graph shows a similar view of the above ones. The Pod count (red) increases to 10 every hour on schedule (blue), load naturally increases and decreases pod count over time, and mean CPU utilization (orange) remains below the target (ie. 60%).
 
-        ![Number of Pods (scheduled vs actual) + Mean CPU Utilization](https://github.com/fernandorubbo/hpa-cron/blob/master/images/pods-vs-mean-cpu.png?raw=true)
+        ![Number of Pods (scheduled vs actual) + Mean CPU Utilization](https://github.com/fernandorubbo/scheduled-autoscaler/blob/master/images/pods-vs-mean-cpu.png?raw=true)
 
 ## Cleaning up
 
