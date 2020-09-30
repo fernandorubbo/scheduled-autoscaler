@@ -1,0 +1,14 @@
+combiner: OR
+conditions:
+- conditionAbsent:
+    aggregations:
+    - alignmentPeriod: 60s
+      crossSeriesReducer: REDUCE_COUNT
+      perSeriesAligner: ALIGN_MEAN
+    duration: 300s
+    filter: metric.type="custom.googleapis.com/scheduled_autoscaler_example" resource.type="k8s_cluster"
+    trigger:
+      count: 1
+  displayName: custom/scheduled_autoscaler_example [COUNT]
+displayName: Scheduled Autoscaler Policy
+enabled: true

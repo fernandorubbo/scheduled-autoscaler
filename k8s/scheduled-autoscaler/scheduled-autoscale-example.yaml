@@ -1,0 +1,39 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: scale-up
+spec:
+  schedule: "50-59/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: custom-metric-extporter
+            image: gcr.io/PROJECT_ID/custom-metric-extporter
+            command:
+              - /export
+              - --name=scheduled_autoscaler_example
+              - --value=10
+          restartPolicy: OnFailure
+      backoffLimit: 1
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: scale-down
+spec:
+  schedule: "1-49/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: custom-metric-extporter
+            image: gcr.io/PROJECT_ID/custom-metric-extporter
+            command:
+              - /export
+              - --name=scheduled_autoscaler_example
+              - --value=1
+          restartPolicy: OnFailure
+      backoffLimit: 1
