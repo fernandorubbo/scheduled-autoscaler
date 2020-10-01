@@ -18,21 +18,21 @@ in the Cloud Console:
 
 ## Introduction
 
-The majority of systems have its users engaging with the app during the day time, what makes most of data center servers idle at night. Beyond other benefits, the public cloud helps to save money by dynamically allocating the needed infrastructure according to the traffic load. There are cases where a simple autoscale configuration solves such allocation problem. However, in other cases big traffic spikes require a more fine tunning of the autoscale configurations to avoid system instability during scale ups.
+The majority of systems have its users engaging with the app during the day time, what makes most of data center servers idle at night. Beyond other benefits, the public cloud helps to save money by dynamically allocating the needed infrastructure according to the traffic load. There are cases where a simple autoscale configuration solves such allocation problem. However, in other cases big traffic spikes require a more fine tuning of the autoscale configurations to avoid system instability during scale ups.
 
-This tutorial focus on scenarios where these traffic patterns are well known and you want to give the autoscaler some hints upfront spikes reache your infrastructure. Although this paper discusses GKE cluster scaling up in the morning and scaling down at night, you can use a similar approach to spin up capacity before known events, such as black friday, syber monday, tv comertials, etc.
+This tutorial focuses on scenarios where these traffic patterns are well known and you want to give the autoscaler some hints before spikes reach your infrastructure. Although this paper discusses GKE cluster scaling up in the morning and scaling down at night, you can use a similar approach to spin up capacity before known events, such as black friday, cyber monday, tv commercials, etc.
 
 ![Scheduled Autoscaler](https://github.com/fernandorubbo/scheduled-autoscaler/blob/master/images/scheduled-autoscaler-arquitecture.png?raw=true)
 
-The above picture shows how the scheduled autoscaler works. First a set of [CronJobs](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/) save the known traffic patterns into a [Cloud Monitoring custom metric](https://cloud.google.com/monitoring/custom-metrics). This data is then used by your [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) (HPA) as a on when HPA should preemptively scale your workload. Along with other load metrics, such as target CPU utilization, HPA decides how to update the replicas of a given deployment.
+The above picture shows how the scheduled autoscaler works. First the known traffic patterns are saved in a set of [CronJobs](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/). These job emit a signal into a [Cloud Monitoring custom metric](https://cloud.google.com/monitoring/custom-metrics). This metric is then used by your [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) (HPA) to preemptively scale your workload. Along with other load metrics, such as target CPU utilization, HPA decides how to update the replicas of a given deployment.
 
 ## Objectives
 
 - Create a GKE cluster.
 - Install the example application.
-- Understand when scaling your cluster down at night is econnomically viable.
+- Understand when scaling your cluster down at night is economically viable.
 - Set up a scheduled autoscaler.
-- Understand how HPA respond to either increase in traffic and custom metrics.
+- Understand how HPA respond to either increase in traffic or custom metrics.
 
 ## Costs
 
@@ -135,7 +135,7 @@ resources you created. For more information, see [Cleaning up](#cleaning-up).
     scheduled-autoscaler   us-central1-f  1.17.9-gke.6300  34.69.187.253  e2-standard-2  1.17.9-gke.6300  1          RUNNING
     ```
 
-    **Note** This is not a production configuration, but useful for demostration. In the above setup, you configure [Cluster Autoscaler](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler) with minimum 1 and maximum 10 nodes, and you enable [optimize-utilization](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#autoscaling_profiles) profile to speed up scale downs.
+    **Note** This is not a production configuration, but useful for demonstration. In the above setup, you configure [Cluster Autoscaler](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler) with minimum 1 and maximum 10 nodes, and you enable the [optimize-utilization](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler#autoscaling_profiles) profile to speed up scale downs.
 
 ## Installing the example application
 
@@ -157,11 +157,11 @@ resources you created. For more information, see [Cleaning up](#cleaning-up).
             name: php-apache
         metrics:
             - type: Resource
-                resource:
-                    name: cpu
-                    target:
-                        type: Utilization
-                        averageUtilization: 60
+              resource:
+                  name: cpu
+                  target:
+                      type: Utilization
+                      averageUtilization: 60
     ```
 
     Note that HPA has a minimum of replicas configured to *10* and it is configured to scale based on *CPU* utilization.
@@ -204,7 +204,7 @@ If you want to scale down you cluster at night, you must first understand the ba
 
 ![Committed-use discount](https://github.com/fernandorubbo/scheduled-autoscaler/blob/master/images/commit-use.png?raw=true)
 
-As you can see in the image above, CUD is flat. Meaning, the resource used during the day doen't compensate the unused resource during the night. Because of this reason, resources used by spikes should not be included in CUD. To optimize your costs, you must use GKE autoscaler options. For example, the scheduled autoscaler discussed in this paper or other managed options discussed in [Best practices for running cost-optimized Kubernetes applications on GKE](https://cloud.google.com/solutions/best-practices-for-running-cost-effective-kubernetes-applications-on-gke#fine-tune_gke_autoscaling). If you are already paying  CUD for a given amount of resources, there is no reason for not using it at night. In this case, try to schedule some jobs to fill the gaps of low computing demand, or keep your cluster warm even without usage.
+As you can see in the image above, CUD is flat. Meaning, the resource used during the day doesn't compensate the unused resource during the night. Because of this reason, resources used by spikes should not be included in CUD. To optimize your costs, you must use GKE autoscaler options. For example, the scheduled autoscaler discussed in this paper or other managed options discussed in [Best practices for running cost-optimized Kubernetes applications on GKE](https://cloud.google.com/solutions/best-practices-for-running-cost-effective-kubernetes-applications-on-gke#fine-tune_gke_autoscaling). If you are already paying  CUD for a given amount of resources, there is no reason for not using it at night. In this case, try to schedule some jobs to fill the gaps of low computing demand, or keep your cluster warm even without usage.
 
 ## Setting up a scheduled autoscaler
 
@@ -252,24 +252,23 @@ After learning the basics of CUD, you should be capable of realizing if it econn
     metadata:
     name: scale-down
     spec:
-    schedule: "1-49/1 * * * *"
-    jobTemplate:
-        spec:
-        template:
-            spec:
-            containers:
-            - name: custom-metric-extporter
-                image: gcr.io/PROJECT_ID/custom-metric-extporter
-                command:
-                - /export
-                - --name=scheduled_autoscaler_example
-                - --value=1
-            restartPolicy: OnFailure
+      schedule: "1-49/1 * * * *"
+      jobTemplate:
+          spec:
+          template:
+              spec:
+              containers:
+              - name: custom-metric-extporter
+                  image: gcr.io/PROJECT_ID/custom-metric-extporter
+                  command:
+                  - /export
+                  - --name=scheduled_autoscaler_example
+                  - --value=1
     ```
 
-    The *CronJobs* are sending the suggested Pod replicas count to a custom metric called **custom.googleapis.com/scheduled_autoscaler_example** based on the time of the day. To facilitate the monitoring section of this tutorial, the *schedule* field configuration define houly scale ups and downs. But you can customize it for a daily strategy pattern, or whatever matches your business needs.
+    The *CronJobs* are sending the suggested Pod replicas count to a custom metric called **custom.googleapis.com/scheduled_autoscaler_example** based on the time of the day. To facilitate the monitoring section of this tutorial, the *schedule* field configuration define hourly scale ups and downs. But you can customize it for a daily strategy pattern, or whatever matches your business needs.
 
-1. Undestand *k8s/scheduled-autoscaler/hpa-example.yaml*.
+1. Understand *k8s/scheduled-autoscaler/hpa-example.yaml*.
 
     ```yaml
     spec:
@@ -281,22 +280,21 @@ After learning the basics of CUD, you should be capable of realizing if it econn
             name: php-apache
         metrics:
             - type: Resource
-                resource:
-                    name: cpu
-                    target:
-                        type: Utilization
-                        averageUtilization: 60
+              resource:
+                  name: cpu
+                  target:
+                      type: Utilization
+                      averageUtilization: 60
             - type: External
-                external:
-                    metric:
-                        name: custom.googleapis.com|scheduled_autoscaler_example
-                    target:
-                        type: AverageValue
-                        averageValue: 1
-
+              external:
+                  metric:
+                      name: custom.googleapis.com|scheduled_autoscaler_example
+                  target:
+                      type: AverageValue
+                      averageValue: 1
     ```
 
-    This HPA object replaces the previously one already deployed. Note that it reduces the number of *minReplicas* to 1, so that the workload can be scaled down to the minimum, and adds an [*External* metric](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics), so that two factors must be considered to trigger an autoscaling activity. In this multiple metrics scenario, HPA will calculate proposed replicas count for each metric, and then choose the one with the highest value. This is extreanmly important to undestand because your schedule autoscaler can propose that in a given moment of time the Pod count should be 1, but if the actual usage of the CPU is higher than expected for 1 pod, HPA will spin up more replicas anyways.
+    This HPA object replaces the previously one already deployed. Note that it reduces the number of *minReplicas* to 1, so that the workload can be scaled down to the minimum, and adds an [*External* metric](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics), so that two factors must be considered to trigger an autoscaling activity. In this multiple metrics scenario, HPA will calculate proposed replicas count for each metric, and then choose the one with the highest value. This is extremely important to understand because your schedule autoscaler can propose that in a given moment of time the Pod count should be 1, but if the actual usage of the CPU is higher than expected for 1 pod, HPA will spin up more replicas anyways.
 
 1. Check the number of nodes and HPA replicas again.
 
@@ -309,7 +307,7 @@ After learning the basics of CUD, you should be capable of realizing if it econn
 
 ## Alerting when scheduled autoscaler is not working properly
 
-If you intent is to run such scheduled autoscaler in a production environment you probably want to be aware when your CronJobs are not populating the custom metric accordingly. For that you must create an alert that triggers when any *custom.googleapis.com/scheduled_autoscaler_example* stream is absent for greater than X minutes. Below steps guide you through this process.
+If your intent is to run such scheduled autoscaler in a production environment you probably want to be aware when your CronJobs are not populating the custom metric accordingly. For that you must create an alert that triggers when any *custom.googleapis.com/scheduled_autoscaler_example* stream is absent for greater than X minutes. Below steps guide you through this process.
 
 1. In the console, click in *Monitoring* in the main menu.
 
@@ -333,7 +331,7 @@ If you intent is to run such scheduled autoscaler in a production environment yo
     Created notification channel [NOTIFICATION_CHANNEL].
     ```
 
-    **Important**: we have created a notification channel of the type email to simplify the tutorial steps. However, in production environments, we strongly encorage you to use a less assynchronous strategy, such as instant message options.
+    **Important**: we have created a notification channel of the type email to simplify the tutorial steps. However, in production environments, we strongly encourage you to use a less asynchronous strategy, such as instant message options.
 
 1. Set a variable with the above value found in **NOTIFICATION_CHANNEL**.
 
@@ -347,7 +345,7 @@ If you intent is to run such scheduled autoscaler in a production environment yo
     gcloud alpha monitoring policies create --policy-from-file=./monitoring/alert-policy.yaml --notification-channels=$NOTIFICATION_CHANNEL
     ```
 
-1. Go to Cloud Monitoring Alerting to se the just created alert policy.
+1. Go to Cloud Monitoring Alerting to see the just created alert policy.
 
     [Go to Alerting page](https://console.cloud.google.com/monitoring/alerting).
 
@@ -373,7 +371,7 @@ If you intent is to run such scheduled autoscaler in a production environment yo
       done;
     ```
 
-    This loop will keep running in your cluster until you delete the *load-generator* deployment. It make requests to your *php-apache* service every few milesseconds. The sleep function ensures load distribution changes during the day. This way you can better understand what happens when you combine CPU utilization and custom metrics in your HPA configuration.
+    This loop will keep running in your cluster until you delete the *load-generator* deployment. It make requests to your *php-apache* service every few milliseconds. The sleep function ensures load distribution changes during the day. This way you can better understand what happens when you combine CPU utilization and custom metrics in your HPA configuration.
 
 ## Understanding how the above setup respond to either increase in traffic or your scheduled metric
 
