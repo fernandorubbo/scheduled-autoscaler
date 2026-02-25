@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine as builder
+FROM golang:1.24-alpine as builder
 WORKDIR /go/src/custom-metric-extporter
 COPY . .
 RUN go build -o /export .
